@@ -28,6 +28,7 @@ public class PaintPlayer : MonoBehaviour
         float current = GameManager.Money;
         float percent = current / total;
         percent *= 100f;
+        //Get the correct value for the FillAmount
         moneyPercent = singlePer *= percent;
         moneyPercent /= 500f;
         moneyPercent /= 7f;

@@ -36,7 +36,8 @@ public class CarAssemble : MonoBehaviour
         }
         else
         {
-            _questSystem.quests.goal[2].AssembledAmount--;
+            if (!canSnap)
+                _questSystem.quests.goal[2].AssembledAmount--;
             canSnap = true;
             _isSnapped = false;
         }

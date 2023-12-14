@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class QuestSystem : MonoBehaviour
 {
-    public Quest quests;
+    public Quest quest;
     public GameManager gameManager;
 
     [SerializeField] TMP_Text _money;
@@ -41,30 +41,32 @@ public class QuestSystem : MonoBehaviour
     [SerializeField] Image _paintUX;
     [SerializeField] Image _cleanUX;
     [SerializeField] Image _assembleUX;
-    bool _Goalsreached;
+    bool _goalsReached;
     [SerializeField] WaypointSystem _waypointSystem;
     [SerializeField] CarSpawner _carSpawner;
 
     private void Start()
     {
         gameManager = GetComponent<GameManager>();
-        _rollsTxt.text = "Re-rolls left:" + "\n" + _reRolls;
-        quests.goal[0].Start();
-        quests.goal[1].Start();
-        quests.goal[2].Start();
+        _rollsTxt.text = "Re-rolls left:\n" + _reRolls;
+        for (int i = 0; i < quest.goal.Length; i++)
+        {
+            quest.goal[i].Start();
+        }
     }
 
     private void Update()
     {
         _money.text = "Money: " + GameManager.Money.ToString("f0");
-        if (_PaintDone && _CleanDone && _AssembleDone && !_Goalsreached)
+        if (_PaintDone && _CleanDone && _AssembleDone && !_goalsReached)
         {
-            _Goalsreached = true;
-            quests.Complete();
+            _goalsReached = true;
+            quest.Complete();
             _reRolls = 3;
-        }//UX Color Changing
+        }
         else
         {
+            #region UX Color Changing
             if (_PaintDone)
             {
                 _paintUX.color = Color.green;
@@ -89,15 +91,17 @@ public class QuestSystem : MonoBehaviour
             {
                 _assembleUX.color = Color.red;
             }
-            if (quests.goal[0].PaintIsReached())
+            #endregion
+
+            if (quest.goal[0].PaintIsReached())
             {
                 _PaintDone = true;
             }
-            if (quests.goal[1].CleanedIsReached())
+            if (quest.goal[1].CleanedIsReached())
             {
                 _CleanDone = true;
             }
-            if (quests.goal[2].AssembleIsReached())
+            if (quest.goal[2].AssembleIsReached())
             {
                 _AssembleDone = true;
             }
@@ -105,19 +109,19 @@ public class QuestSystem : MonoBehaviour
     }
     public void OpenRequest()
     {
-        quests.goal[0].paintedNeeded = 0;
-        quests.goal[1].CleanedNeeded = 0;
-        quests.goal[2].AssembleNeeded = 0;
+        quest.goal[0].paintedNeeded = 0;
+        quest.goal[1].CleanedNeeded = 0;
+        quest.goal[2].AssembleNeeded = 0;
         if (_reRolls <= 0)
         {
             _noReRollsUI.SetActive(true);
             return;
         }
-        colorIndex = Random.Range(0, quests.colors.Length);
-        _colorTxt.text = quests.color[colorIndex];
-        _rewardTxt.text = quests.reward.ToString();
-        quests.colorImage.color = quests.colors[colorIndex];
-        quests.colorFill.color = quests.colors[colorIndex];
+        colorIndex = Random.Range(0, quest.colors.Length);
+        _colorTxt.text = quest.color[colorIndex];
+        _rewardTxt.text = quest.reward.ToString();
+        quest.colorImage.color = quest.colors[colorIndex];
+        quest.colorFill.color = quest.colors[colorIndex];
         _reRolls--;
         _rollsTxt.text = "Re-rolls left:" + "\n" + _reRolls;
         _requestUI.SetActive(true);
@@ -125,56 +129,56 @@ public class QuestSystem : MonoBehaviour
 
     public void AcceptRequest()
     {
-        gameManager.activeRequests.Add(quests);
+        gameManager.activeRequests.Add(quest);
 
         _requestUI.SetActive(false);
-        quests.isActive = true;
+        quest.isActive = true;
 
         _newRequestUI.SetActive(false);
 
         _activeColorTxt.text = _colorTxt.text;
-        _colorImage.color = quests.colors[colorIndex];
-        _colorFill.color = quests.colors[colorIndex];
+        _colorImage.color = quest.colors[colorIndex];
+        _colorFill.color = quest.colors[colorIndex];
         _activeRequestUI.SetActive(true);
 
         _carSpawner.SpawnCar();
         _waypointSystem = CarSpawner.currentCar.GetComponent<WaypointSystem>();
         _rend = _glassFill.GetComponent<Renderer>();
-        _rend.material.SetColor("_LiquidColor", quests.colors[QuestSystem.colorIndex]);
-        _rend.material.SetColor("_SurfaceColor", quests.colors[QuestSystem.colorIndex]);
+        _rend.material.SetColor("_LiquidColor", quest.colors[QuestSystem.colorIndex]);
+        _rend.material.SetColor("_SurfaceColor", quest.colors[QuestSystem.colorIndex]);
         _sprayRend = _sprayParticle.GetComponent<Renderer>();
-        _sprayRend.material.color = quests.colors[QuestSystem.colorIndex];
+        _sprayRend.material.color = quest.colors[QuestSystem.colorIndex];
     }
 
     public void PaintCarPart()
     {
-        if (quests.isActive)
+        if (quest.isActive)
         {
-            quests.goal[0].CarPartPainted();
+            quest.goal[0].CarPartPainted();
         }
     }
 
     public void CleanCarPart()
     {
-        if (quests.isActive)
+        if (quest.isActive)
         {
-            quests.goal[1].CarPartCleaned();
+            quest.goal[1].CarPartCleaned();
         }
     }
 
     public void CarPartAssembled()
     {
-        if (quests.isActive)
+        if (quest.isActive)
         {
-            quests.goal[2].CarPartAssembled();
+            quest.goal[2].CarPartAssembled();
         }
     }
 
     public void CompleteRequest()
     {
-        float newReward = quests.reward / 100;
-        float total = quests.goal[0].paintedNeeded + quests.goal[1].CleanedNeeded + quests.goal[2].AssembleNeeded;
-        float completed = quests.goal[0].paintedAmount + quests.goal[1].CleanedAmount + quests.goal[2].AssembledAmount;
+        float newReward = quest.reward / 100;
+        float total = quest.goal[0].paintedNeeded + quest.goal[1].CleanedNeeded + quest.goal[2].AssembleNeeded;
+        float completed = quest.goal[0].paintedAmount + quest.goal[1].CleanedAmount + quest.goal[2].AssembledAmount;
         float percent = completed / total;
         percent *= 100f;
         Debug.Log("Percent of total gained: " + percent);
