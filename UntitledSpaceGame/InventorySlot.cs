@@ -56,18 +56,15 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IDataPersistence
 
         if (transform.childCount == 0)
         {
+            // Drop Item In Inventory Slot When It Was Empty On Drop
             if (InventoryManager.Instance.heldItem != null)
             {
                 InventoryManager.Instance.heldItem.parentAfterDrag = transform;
-                if (InventoryManager.Instance.heldItem.item.isFuel && isFuelSlot)
-                {
-
-                }
             }
-
         }
         else
         {
+            // Add Item To Inventory Slot On Drop
             _itemInThisSlot = transform.GetChild(0).GetComponent<InventoryItem>();
 
             if (InventoryManager.Instance.heldItem.item == _itemInThisSlot.item)
@@ -99,14 +96,13 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IDataPersistence
             }
 
         }
-        // _itemInThisSlot.GetComponent<Image>().raycastTarget = true;
         InventoryManager.Instance.UpdateItemsInfoList();
     }
 
 
     public void AddItemToSlot(InventoryItem inventoryItem)
     {
-        // heldItem = eventData.pointerDrag.GetComponent<InventoryItem>();
+        // Check If Item Can Go In This Slot
         if (_itemInThisSlot != null)
         {
             if (InventoryManager.Instance.heldItem.item == _itemInThisSlot.item)
@@ -137,7 +133,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IDataPersistence
             InventoryManager.Instance.SpawnNewItem(inventoryItem.item.itemID, 1, slotId);
             InventoryManager.Instance.heldItem.count--;
             InventoryManager.Instance.heldItem.RefreshCount();
-            Debug.Log($"{InventoryManager.Instance.heldItem.count}");
             Debug.Log("Succesfully Spawned New Item In Slot: " + gameObject.name);
         }
     }
@@ -154,6 +149,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IDataPersistence
 
     public void UseItem()
     {
+        // Use Item And Remove It From Your Inventory
         if (_itemInThisSlot.count > 1)
         {
             _itemInThisSlot.count--;
@@ -172,11 +168,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IDataPersistence
         {
             return;
         }
-        if (isMachineSlot || isFuelSlot || isResourceSlot)
-        {
-            // InventoryManager.Instance.SpawnNewItemMining(data.itemId[slotId], data.itemAmount[slotId], this.slotId);
-            return;
-        }
         else
         {
             InventoryManager.Instance.SpawnNewItem(data.itemId[slotId], data.itemAmount[slotId], this.slotId);
@@ -186,20 +177,12 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IDataPersistence
 
     public void SaveData(GameData data)
     {
-        if (isMachineSlot || isFuelSlot || isResourceSlot)
-        {
-            //Not needed to save and load
-            return;
-        }
         if (_itemInThisSlot == null)
         {
-            // Debug.Log("didnt find Item in slot: " + slotId);
-
             data.itemId[slotId] = -1;
             data.itemAmount[slotId] = 0;
             return;
         }
-        // Debug.Log("found Item in slot: " + slotId);
         data.itemId[slotId] = _itemInThisSlot.item.itemID;
         data.itemAmount[slotId] = _itemInThisSlot.count;
     }
