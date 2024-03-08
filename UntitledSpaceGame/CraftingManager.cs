@@ -2,22 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CraftingManager : MonoBehaviour
 {
     public static CraftingManager Instance;
 
-    [SerializeField] Recipe[] allRecipes;
-    public Recipe selectedRecipeToCraft;
+    [SerializeField] Recipe[] _allRecipes;
+    [SerializeField] Recipe _selectedRecipeToCraft;
 
-    public Transform recipeListTransform;
-    public GameObject itemPrefab;
+    [SerializeField] Transform _recipeListTransform;
+    [SerializeField] GameObject _itemPrefab;
 
     [Header("Recipe Selection")]
-    [SerializeField] GameObject imagePrefab;
-    [SerializeField] Transform imageListTransform;
-    public CraftButton selectedButtonObject;
+    [SerializeField] GameObject _imagePrefab;
+    [SerializeField] Transform _imageListTransform;
+    [SerializeField] CraftButton _selectedButtonObject;
     [SerializeField] List<Recipe> _currentRecipes = new();
 
     void Awake()
@@ -34,17 +33,17 @@ public class CraftingManager : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < recipeListTransform.childCount; i++)
+        for (int i = 0; i < _recipeListTransform.childCount; i++)
         {
-            _currentRecipes.Add(recipeListTransform.GetChild(i).GetComponent<CraftButton>().recipe);
+            _currentRecipes.Add(_recipeListTransform.GetChild(i).GetComponent<CraftButton>().recipe);
         }
     }
 
     public void SelectCraftingRecipe(Recipe recipe, CraftButton button)
     {
-        for (int i = imageListTransform.childCount; i > 0; i--)
+        for (int i = _imageListTransform.childCount; i > 0; i--)
         {
-            Destroy(imageListTransform.GetChild(i - 1).gameObject);
+            Destroy(_imageListTransform.GetChild(i - 1).gameObject);
         }
         if (recipe == null)
         {
@@ -52,14 +51,14 @@ public class CraftingManager : MonoBehaviour
             return;
         }
 
-        selectedRecipeToCraft = recipe;
-        selectedButtonObject = button;
+        _selectedRecipeToCraft = recipe;
+        _selectedButtonObject = button;
 
         Debug.Log($"Selected Recipe {recipe}");
 
         for (int i = 0; i < recipe.itemsNeeded.Length; i++)
         {
-            GameObject spawnedImage = Instantiate(imagePrefab, imageListTransform);
+            GameObject spawnedImage = Instantiate(_imagePrefab, _imageListTransform);
             spawnedImage.GetComponent<Image>().sprite = recipe.itemsNeeded[i].item.image;
             spawnedImage.transform.GetChild(0).GetComponent<TMP_Text>().text = recipe.itemsNeeded[i].amount.ToString();
         }
@@ -67,27 +66,27 @@ public class CraftingManager : MonoBehaviour
 
     public void CraftItem()
     {
-        if (selectedRecipeToCraft != null)
+        if (_selectedRecipeToCraft != null)
         {
-            for (int i = 0; i < selectedRecipeToCraft.itemsNeeded.Length; i++)
+            for (int i = 0; i < _selectedRecipeToCraft.itemsNeeded.Length; i++)
             {
                 for (int y = 0; y < InventoryManager.Instance.itemsInInventory.Count; y++)
                 {
-                    if (InventoryManager.Instance.itemsInInventory[y].item == selectedRecipeToCraft.itemsNeeded[i].item)
+                    if (InventoryManager.Instance.itemsInInventory[y].item == _selectedRecipeToCraft.itemsNeeded[i].item)
                     {
-                        if (InventoryManager.Instance.itemsInInventory[y].amount < selectedRecipeToCraft.itemsNeeded[i].amount)
+                        if (InventoryManager.Instance.itemsInInventory[y].amount < _selectedRecipeToCraft.itemsNeeded[i].amount)
                         {
-                            Debug.Log($"You don't have enough {selectedRecipeToCraft.itemsNeeded[i].item.name} to craft this item!");
+                            Debug.Log($"You don't have enough {_selectedRecipeToCraft.itemsNeeded[i].item.name} to craft this item!");
                             return;
                         }
                     }
                 }
             }
-            for (int i = 0; i < selectedRecipeToCraft.itemsNeeded.Length; i++)
+            for (int i = 0; i < _selectedRecipeToCraft.itemsNeeded.Length; i++)
             {
-                InventoryManager.Instance.UseItem(selectedRecipeToCraft.itemsNeeded[i].item.itemID, selectedRecipeToCraft.itemsNeeded[i].amount);
+                InventoryManager.Instance.UseItem(_selectedRecipeToCraft.itemsNeeded[i].item.itemID, _selectedRecipeToCraft.itemsNeeded[i].amount);
             }
-            InventoryManager.Instance.AddItem(selectedRecipeToCraft.itemToCraft.itemID, selectedRecipeToCraft.amountToCraft);
+            InventoryManager.Instance.AddItem(_selectedRecipeToCraft.itemToCraft.itemID, _selectedRecipeToCraft.amountToCraft);
         }
         else
         {
@@ -97,18 +96,18 @@ public class CraftingManager : MonoBehaviour
 
     public void RecipeButton(int itemID)
     {
-        for (int r = 0; r < allRecipes.Length; r++)
+        for (int r = 0; r < _allRecipes.Length; r++)
         {
-            if (allRecipes[r].itemToCraft.itemID == itemID)
+            if (_allRecipes[r].itemToCraft.itemID == itemID)
             {
-                if (_currentRecipes.Contains(allRecipes[r]))
+                if (_currentRecipes.Contains(_allRecipes[r]))
                 {
-                    Debug.LogError($"There is already a recipe for {allRecipes[r]}");
+                    Debug.LogError($"There is already a recipe for {_allRecipes[r]}");
                     return;
                 }
                 else
                 {
-                    AddRecipe(allRecipes[r]);
+                    AddRecipe(_allRecipes[r]);
                     return;
                 }
             }
@@ -119,7 +118,7 @@ public class CraftingManager : MonoBehaviour
 
     public void AddRecipe(Recipe recipe)
     {
-        GameObject spawnedRecipe = Instantiate(itemPrefab, recipeListTransform);
+        GameObject spawnedRecipe = Instantiate(_itemPrefab, _recipeListTransform);
         spawnedRecipe.GetComponent<CraftButton>().recipe = recipe;
         spawnedRecipe.GetComponent<CraftButton>().UpdateRecipeUI();
         _currentRecipes.Add(recipe);
