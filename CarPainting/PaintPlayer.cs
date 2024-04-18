@@ -15,6 +15,7 @@ public class PaintPlayer : MonoBehaviour
     public Color[] colors;
 
     float moneyPercent;
+
     public void Spray()
     {
         spray = !spray;
